@@ -1,61 +1,61 @@
 {
-    "providers": [
+  "providers": [
+    {
+      "provider": "openai",
+      "models": [
         {
-            "provider": "openai",
-            "models": [
-                {
-                    "model": "anthropic/claude-3.7-sonnet",
-                    "title": "Claude 3.7 Sonnet (OpenRouter)",
-                    "baseURL": "https://openrouter.ai/api/v1",
-                    "apiKey": "sk-****"
-                },
-                {
-                    "model": "anthropic/claude-3.5-sonnet",
-                    "title": "Claude 3.5 Sonnet (OpenRouter)",
-                    "baseURL": "https://openrouter.ai/api/v1",
-                    "apiKey": "sk-****"
-                },
-                {
-                    "model": "openai/gpt-4o",
-                    "title": "GPT-4o (OpenRouter)",
-                    "baseURL": "https://openrouter.ai/api/v1",
-                    "apiKey": "sk-****"
-                },
-                {
-                    "model": "gpt-4o",
-                    "title": "GPT-4o (302)",
-                    "baseURL": "https://api.302.ai/v1",
-                    "apiKey": "sk-****"
-                }
-            ]
+          "model": "anthropic/claude-3.7-sonnet",
+          "title": "Claude 3.7 Sonnet (OpenRouter)",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "apiKey": "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"
         },
         {
-            "provider": "anthropic",
-            "models": [
-                {
-                    "model": "claude-3-7-sonnet-latest",
-                    "title": "Claude 3.7 Sonnet (302)",
-                    "baseURL": "https://api.302.ai/v1",
-                    "apiKey": "sk-****"
-                },
-                {
-                    "model": "claude-3-5-sonnet-latest",
-                    "title": "Claude 3.5 Sonnet (302)",
-                    "baseURL": "https://api.302.ai/v1",
-                    "apiKey": "sk-****"
-                }
-            ]
+          "model": "anthropic/claude-3.5-sonnet",
+          "title": "Claude 3.5 Sonnet (OpenRouter)",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "apiKey": "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"
         },
         {
-            "provider": "deepseek",
-            "models": [
-                {
-                    "model": "deepseek-chat",
-                    "title": "DeepSeek-V3 Chat (DeepSeek)",
-                    "baseURL": "https://api.deepseek.com/v1",
-                    "apiKey": "sk-****"
-                }
-            ]
+          "model": "openai/gpt-4o",
+          "title": "GPT-4o (OpenRouter)",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
+        },
+        {
+          "model": "gpt-4o",
+          "title": "GPT-4o (302)",
+          "baseURL": "https://api.302.ai/v1",
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
         }
-    ]
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "models": [
+        {
+          "model": "claude-3-7-sonnet-latest",
+          "title": "Claude 3.7 Sonnet (302)",
+          "baseURL": "https://api.302.ai/v1",
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
+        },
+        {
+          "model": "claude-3-5-sonnet-latest",
+          "title": "Claude 3.5 Sonnet (302)",
+          "baseURL": "https://api.302.ai/v1",
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
+        }
+      ]
+    },
+    {
+      "provider": "deepseek",
+      "models": [
+        {
+          "model": "deepseek-chat",
+          "title": "DeepSeek-V3 Chat (DeepSeek)",
+          "baseURL": "https://api.deepseek.com/v1",
+          "apiKey": "sk-778deaff83d44d3a864caa8f3cf46c75"
+        }
+      ]
+    }
+  ]
 }

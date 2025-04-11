@@ -46,8 +46,8 @@ export default function CodegenDetailPage({
 }: {
   params: { codegenId: string }
 }) {
-  const { data: codegenDetail, isLoading } = useCodegenDetail(params.codegenId)
   const router = useRouter()
+  const { data: codegenDetail, isLoading } = useCodegenDetail(params.codegenId)
 
   const [currentPage, setCurrentPage] = useState(1)
   const [searchKeyword, setSearchKeyword] = useState("")
