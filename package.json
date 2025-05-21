@@ -9,11 +9,13 @@
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
     "storybook": "storybook dev -p 6006",
+    "test:storybook": "test-storybook",
     "test": "jest",
     "build-storybook": "storybook build",
     "migrate-codegen": "tsx lib/db/codegen/migrate.ts",
     "build:docker": "docker build -t compoder:latest .",
-    "build:artifacts-docker": "bash script/build-artifacts-docker.sh"
+    "build:artifacts-docker": "bash script/build-artifacts-docker.sh",
+    "postinstall": "playwright install chromium"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.1.17",
@@ -65,6 +67,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.9.0",
+    "@storybook/experimental-addon-test": "^8.6.12",
     "@storybook/addon-essentials": "^8.3.6",
     "@storybook/addon-interactions": "^8.3.6",
     "@storybook/addon-links": "^8.3.6",
@@ -80,6 +83,7 @@
     "@storybook/preview-api": "^8.4.6",
     "@storybook/react": "^8.3.6",
     "@storybook/test": "^8.3.6",
+    "@storybook/test-runner": "^0.22.0",
     "@storybook/theming": "^8.4.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -104,6 +108,7 @@
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.15.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "playwright": "^1.51.1"
   }
 }
