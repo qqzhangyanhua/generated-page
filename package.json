@@ -15,7 +15,10 @@
     "migrate-codegen": "tsx lib/db/codegen/migrate.ts",
     "build:docker": "docker build -t compoder:latest .",
     "build:artifacts-docker": "bash script/build-artifacts-docker.sh",
-    "postinstall": "playwright install chromium"
+    "postinstall": "playwright install chromium",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.1.17",
@@ -105,6 +108,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "playwright": "^1.51.1",
     "postcss": "^8",
+    "prettier": "^3.5.3",
     "storybook": "^8.3.6",
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.3.1",
