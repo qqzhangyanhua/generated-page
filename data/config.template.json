@@ -18,6 +18,20 @@
           "apiKey": "sk-****"
         },
         {
+          "model": "moonshotai/kimi-k2:free",
+          "title": "Kimi K2 (OpenRouter)",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "apiKey": "sk-****",
+          "features": ["vision"]
+        },
+        {
+          "model": "moonshotai/kimi-k2",
+          "title": "Kimi K2 (OpenRouter)",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "apiKey": "sk-****",
+          "features": ["vision"]
+        },
+        {
           "model": "openai/gpt-4o",
           "title": "GPT-4o (OpenRouter)",
           "baseURL": "https://openrouter.ai/api/v1",
