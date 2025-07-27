@@ -35,6 +35,7 @@ export const getAIClient = (provider: AIProvider, model: string) => {
       return createOpenRouter({
         baseURL: modelConfig.baseURL,
         apiKey: modelConfig.apiKey,
+        extraBody: modelConfig.extraBody || {},
       }).chat(modelConfig.model)
     default:
       throw new Error(`Unsupported AI provider: ${provider}`)

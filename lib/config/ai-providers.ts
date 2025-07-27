@@ -16,6 +16,7 @@ export type AIModelConfig = {
   baseURL: string
   features: Array<"vision">
   apiKey: string
+  extraBody?: Record<string, any>
 }
 
 // Provider configuration
@@ -36,6 +37,7 @@ export type ProcessedAIModelConfig = {
   baseURL: string
   apiKey: string
   headers?: Record<string, string>
+  extraBody?: Record<string, any>
 }
 
 // Processed provider configuration
