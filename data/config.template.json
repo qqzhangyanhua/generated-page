@@ -18,20 +18,6 @@
           "apiKey": "sk-****"
         },
         {
-          "model": "moonshotai/kimi-k2:free",
-          "title": "Kimi K2 (OpenRouter)",
-          "baseURL": "https://openrouter.ai/api/v1",
-          "apiKey": "sk-****",
-          "features": ["vision"]
-        },
-        {
-          "model": "moonshotai/kimi-k2",
-          "title": "Kimi K2 (OpenRouter)",
-          "baseURL": "https://openrouter.ai/api/v1",
-          "apiKey": "sk-****",
-          "features": ["vision"]
-        },
-        {
           "model": "openai/gpt-4o",
           "title": "GPT-4o (OpenRouter)",
           "baseURL": "https://openrouter.ai/api/v1",
@@ -44,6 +30,13 @@
           "baseURL": "https://api.302.ai/v1",
           "features": ["vision"],
           "apiKey": "sk-****"
+        },
+        {
+          "model": "kimi-k2-0711-preview",
+          "title": "Kimi K2-0711-Preview (Moonshot)",
+          "baseURL": "https://api.moonshot.cn/v1",
+          "apiKey": "sk-****",
+          "features": ["vision"]
         }
       ]
     },
@@ -94,32 +87,28 @@
       "provider": "openrouter",
       "models": [
         {
-          "model": "anthropic/claude-3.7-sonnet",
-          "title": "Claude 3.7 Sonnet",
+          "model": "moonshotai/kimi-k2",
+          "title": "Kimi K2",
           "baseURL": "https://openrouter.ai/api/v1",
           "features": ["vision"],
-          "apiKey": "sk-****"
+          "apiKey": "sk-****",
+          "extraBody": {
+            "provider": {
+              "only": ["Together"]
+            }
+          }
         },
         {
-          "model": "anthropic/claude-3.5-sonnet",
-          "title": "Claude 3.5 Sonnet",
+          "model": "anthropic/claude-sonnet-4",
+          "title": "Claude 4 Sonnet",
           "baseURL": "https://openrouter.ai/api/v1",
           "features": ["vision"],
-          "apiKey": "sk-****"
-        },
-        {
-          "model": "openai/gpt-4o",
-          "title": "GPT-4o",
-          "baseURL": "https://openrouter.ai/api/v1",
-          "features": ["vision"],
-          "apiKey": "sk-****"
-        },
-        {
-          "model": "mistralai/devstral-small:free",
-          "title": "Devstral-small(free)",
-          "baseURL": "https://openrouter.ai/api/v1",
-          "features": [""],
-          "apiKey": "sk-****"
+          "apiKey": "sk-****",
+          "extraBody": {
+            "provider": {
+              "only": ["Anthropic"]
+            }
+          }
         }
       ]
     }
