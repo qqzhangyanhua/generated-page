@@ -62,6 +62,9 @@ docker compose up -d
 
 # Migrate codegen configurations
 pnpm migrate-codegen
+
+# Generate JWT secrets for .env
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
 ### Development
@@ -90,6 +93,8 @@ pnpm lint                  # ESLint + TypeScript check (tsc --noEmit)
 pnpm format                # Prettier formatting
 pnpm format:check          # Check Prettier formatting
 ```
+
+**Note**: Always run `pnpm lint` after making code changes to ensure TypeScript compliance and code quality.
 
 ### Build & Deploy
 
@@ -129,8 +134,9 @@ Follow the 4-file structure defined in `.cursor/rules/generate-biz-component.mdc
 ### TypeScript Standards
 
 - **CRITICAL**: No `any` types allowed - use proper TypeScript typing
-- Define interfaces in separate `interface.ts` files
+- Define interfaces in separate `interface.ts` files  
 - Export types alongside components
+- Keep individual files under 500 lines - split into smaller components or hooks when exceeded
 
 ## Testing Strategy
 
@@ -155,4 +161,8 @@ The project includes specialized Cursor rules for code generation:
 
 **Schema Organization**: Each domain has separate schema, mutations, and selectors files in `lib/db/[domain]/`.
 
-- yanz57213@gmail.com 测试帐号, 密码: a12345678
+**Test Account**: yanz57213@gmail.com (password: a12345678)
+
+## Package Management
+
+**IMPORTANT**: Always use `pnpm` for package management, never use `npm`.

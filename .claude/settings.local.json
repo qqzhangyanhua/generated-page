@@ -5,7 +5,10 @@
       "Bash(pnpm add:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm lint:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(pnpm link:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": [],
     "ask": []
