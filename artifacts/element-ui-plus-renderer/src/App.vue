@@ -24,7 +24,6 @@ export default {
     const handleMessage = event => {
       const { type, data } = event.data
       if (type === "artifacts") {
-        console.log("handleMessage==========================", data)
         codeContent.value = data.files[data.entryFile]
         createComponentFromString(codeContent.value)
         key.value += 1 // Update the key to force remount

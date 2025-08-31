@@ -7,19 +7,22 @@
           "model": "anthropic/claude-3.7-sonnet",
           "title": "Claude 3.7 Sonnet (OpenRouter)",
           "baseURL": "https://openrouter.ai/api/v1",
-          "apiKey": "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"
+          "apiKey": "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",
+          "features": ["vision"]
         },
         {
           "model": "anthropic/claude-3.5-sonnet",
           "title": "Claude 3.5 Sonnet (OpenRouter)",
           "baseURL": "https://openrouter.ai/api/v1",
-          "apiKey": "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"
+          "apiKey": "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",
+          "features": ["vision"]
         },
         {
           "model": "openai/gpt-4o",
           "title": "GPT-4o (OpenRouter)",
           "baseURL": "https://openrouter.ai/api/v1",
-          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0",
+          "features": ["vision"]
         },
         {
           "model": "gpt-4o",
@@ -42,7 +45,8 @@
           "model": "claude-3-5-sonnet-latest",
           "title": "Claude 3.5 Sonnet (302)",
           "baseURL": "https://api.302.ai/v1",
-          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0"
+          "apiKey": "sk-9oEqKDh3XbrYjq14yOi605c247r449wJMityFH5r0yuV13t0",
+          "features": ["vision"]
         }
       ]
     },
@@ -53,7 +57,49 @@
           "model": "deepseek-chat",
           "title": "DeepSeek-V3 Chat (DeepSeek)",
           "baseURL": "https://api.deepseek.com/v1",
-          "apiKey": "sk-778deaff83d44d3a864caa8f3cf46c75"
+          "apiKey": "sk-778deaff83d44d3a864caa8f3cf46c75",
+          "features": []
+        }
+      ]
+    },
+    {
+      "provider": "ollama",
+      "models": [
+        {
+          "model": "qwen2.5:14b",
+          "title": "qwen2.5 (Ollama)",
+          "baseURL": "http://localhost:11434/api",
+          "features": ["vision"],
+          "apiKey": ""
+        }
+      ]
+    },
+    {
+      "provider": "openrouter",
+      "models": [
+        {
+          "model": "moonshotai/kimi-k2",
+          "title": "Kimi K2",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "features": ["vision"],
+          "apiKey": "sk-****",
+          "extraBody": {
+            "provider": {
+              "only": ["Together"]
+            }
+          }
+        },
+        {
+          "model": "anthropic/claude-sonnet-4",
+          "title": "Claude 4 Sonnet",
+          "baseURL": "https://openrouter.ai/api/v1",
+          "features": ["vision"],
+          "apiKey": "sk-****",
+          "extraBody": {
+            "provider": {
+              "only": ["Anthropic"]
+            }
+          }
         }
       ]
     }

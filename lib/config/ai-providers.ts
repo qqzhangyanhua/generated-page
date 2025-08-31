@@ -2,7 +2,12 @@ import fs from "fs"
 import path from "path"
 
 // Define AI provider types
-export type AIProvider = "openai" | "anthropic" | "deepseek" | "ollama"
+export type AIProvider =
+  | "openai"
+  | "anthropic"
+  | "deepseek"
+  | "ollama"
+  | "openrouter"
 
 // Model configuration
 export type AIModelConfig = {
@@ -11,6 +16,7 @@ export type AIModelConfig = {
   baseURL: string
   features: Array<"vision">
   apiKey: string
+  extraBody?: Record<string, any>
 }
 
 // Provider configuration
@@ -31,6 +37,7 @@ export type ProcessedAIModelConfig = {
   baseURL: string
   apiKey: string
   headers?: Record<string, string>
+  extraBody?: Record<string, any>
 }
 
 // Processed provider configuration
@@ -69,23 +76,26 @@ export function loadAIProvidersConfig(
     const config = JSON.parse(configFileContent) as AIProvidersConfig
 
     // Process the configuration - convert array to record for backward compatibility
-    const processedConfig = config.providers.reduce((acc, providerConfig) => {
-      const provider = providerConfig.provider
+    const processedConfig = config.providers.reduce(
+      (acc, providerConfig) => {
+        const provider = providerConfig.provider
 
-      // Process models - directly use the values from the config file
-      const processedModels = providerConfig.models.map(model => {
-        return {
-          ...model,
+        // Process models - directly use the values from the config file
+        const processedModels = providerConfig.models.map(model => {
+          return {
+            ...model,
+          }
+        })
+
+        acc[provider] = {
+          provider,
+          models: processedModels,
         }
-      })
 
-      acc[provider] = {
-        provider,
-        models: processedModels,
-      }
-
-      return acc
-    }, {} as Record<AIProvider, ProcessedAIProviderConfig>)
+        return acc
+      },
+      {} as Record<AIProvider, ProcessedAIProviderConfig>,
+    )
 
     // Update cache
     configCache = processedConfig
