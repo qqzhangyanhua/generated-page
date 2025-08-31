@@ -4,23 +4,11 @@
 
 <h1 align="center" style="border-bottom: none">
     <b>
-        <a href="https://github.com/IamLiuLv/compoder">Compoder</a><br>
     </b>
     AI-Powered Component Code Generator For Every Frontend Engineer<br>
 </h1>
 
 Compoder is an open-source AI-powered component code generation engine that integrates modern frontend tech stacks with various AI model capabilities. You can customize Compoder to create AI-powered component code generators based on specific technology stacks (such as React, Vue, Mui, Antd, Element-Plus, Tailwind CSS, Shadcn UI...) and specific scenarios (such as Landing Pages, Email Templates, Admin Dashboard Forms).
-
-<p align="center">
-    <a href="https://github.com/IamLiuLv/compoder" target="_blank">
-        <img alt="Static Badge" src="https://img.shields.io/badge/open-source?logo=github&color=%20%23155EEF&label=source&labelColor=%20%23528bff"></a>
-    <a href="https://github.com/IamLiuLv/compoder/discussions" target="_blank">
-        <img alt="GitHub Discussions" src="https://img.shields.io/badge/discussions-5865F2?logo=github&logoColor=white&style=flat"></a>
-    <a href="#community-and-support" target="_blank">
-        <img alt="Community Support" src="https://img.shields.io/badge/Community-Support-5865F2?logo=wechat&logoColor=white&style=flat"></a>
-    <a href="https://github.com/IamLiuLv/compoder/issues" target="_blank">
-        <img alt="GitHub Issues" src="https://img.shields.io/badge/issues-fc8203?logo=github&logoColor=white&style=flat"></a>
-</p>
 
 <p align="center">
   <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
@@ -102,7 +90,6 @@ We are continuously improving Compoder and will launch more exciting new feature
 
 ```bash
 # Clone the repository
-git clone https://github.com/IamLiuLv/compoder.git
 cd compoder
 
 # Install dependencies
@@ -199,12 +186,6 @@ Star Compoder on GitHub to receive notifications about new versions immediately.
 
 ## Community and Support
 
-- [GitHub Discussions](https://github.com/IamLiuLv/compoder/discussions) 👉: Best for sharing feedback and asking questions.
-- [GitHub Issues](https://github.com/IamLiuLv/compoder/issues) 👉: Best for reporting bugs and suggesting features.
-- [WeChat](./assets/wechat.png): Scan the QR code below, add as a WeChat friend with the note: Compoder, to join the Compoder community. We will share the latest updates, technical insights, component code generator templates, and look for long-term partners.
-
-<img src="./assets/wechat.png" alt="compoder" width="100px">
-
 ## Contributing
 
 For contributors who want to contribute to Compoder, we welcome your PRs and Issues. We will review and provide feedback promptly.
@@ -214,10 +195,6 @@ For contributors who want to contribute to Compoder, we welcome your PRs and Iss
 **Contributors**
 
 Thanks to all the contributors who have contributed to Compoder. Your efforts make Compoder better.
-
-<a href="https://github.com/IamLiuLv/compoder/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=IamLiuLv/compoder" />
-</a>
 
 ## Security Issues
 

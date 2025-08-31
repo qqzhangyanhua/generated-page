@@ -4,8 +4,6 @@
 
 ## issue 管理
 
-[查找](https://github.com/IamLiuLv/compoder/issues?q=is:issue+is:open)现有 issue 或[新建](https://github.com/IamLiuLv/compoder/issues/new/choose)issue。
-
 ### 如何新建 issue？
 
 **1. 功能 issue**
@@ -33,8 +31,6 @@
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### 2. Fork 仓库
-
-访问 [Compoder GitHub 仓库](https://github.com/IamLiuLv/compoder)，点击右上角的 "Fork" 按钮创建一个属于您自己的仓库副本。
 
 ### 3. 克隆仓库
 
@@ -157,8 +153,6 @@ pnpm dev
    - PR 标题应简明扼要地描述变更内容
    - PR 描述应包含详细的变更说明、相关 issue 链接等
 
-PR 合并后，您将荣登项目[贡献者名单](https://github.com/IamLiuLv/compoder/graphs/contributors)。
-
 ## 代码生成命令
 
 Compoder 提供了基于 Cursor 的多种代码生成命令，便于快速创建各类组件和服务：
@@ -186,8 +180,4 @@ compoder refactor:bizcomponent
 
 遇到问题时可：
 
-- 加入 [GitHub Discussions](https://github.com/IamLiuLv/compoder/discussions) 社区
-- 在 [GitHub Issues](https://github.com/IamLiuLv/compoder/issues) 中提问
 - 加入社区，扫描下方二维码，添加微信好友，备注：Compoder，拉你进入 Compoder 社区，在社区中和一群志同道合的小伙伴一起交流学习。
-
-<img src="./assets/wechat.png" alt="compoder" width="100px">

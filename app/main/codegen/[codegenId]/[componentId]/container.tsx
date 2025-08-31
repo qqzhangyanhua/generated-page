@@ -140,23 +140,13 @@ export const ComponentDetailContainer = () => {
         onSubmit={handleChatSubmit}
         actions={[
           supportVision && (
-            <TooltipProvider key="draw-image">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <TldrawEdit
-                      disabled={isStreaming}
-                      onSubmit={imageData => {
-                        setImages(prev => [...prev, imageData])
-                      }}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Draw An Image</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <TldrawEdit
+              key="draw-image"
+              disabled={isStreaming}
+              onSubmit={imageData => {
+                setImages(prev => [...prev, imageData])
+              }}
+            />
           ),
           <LLMSelectorButton key="llm-selector" />,
         ].filter(Boolean)}

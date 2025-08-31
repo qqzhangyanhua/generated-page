@@ -4,8 +4,6 @@ Welcome to the Compoder contributing guide! As an AI-powered component code gene
 
 ## Issue Management
 
-[Find](https://github.com/IamLiuLv/compoder/issues?q=is:issue+is:open) existing issues or [create](https://github.com/IamLiuLv/compoder/issues/new/choose) a new one.
-
 ### How to Create an Issue
 
 **1. Feature Requests**

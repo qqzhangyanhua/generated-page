@@ -4,22 +4,14 @@
 
 <h1 align="center" style="border-bottom: none">
     <b>
-        <a href="https://github.com/IamLiuLv/compoder">Compoder</a><br>
     </b>
     AI-Powered Component Code Generator For Every Frontend Engineer<br>
 </h1>
 
 Compoder 是一个开源的 AI 驱动组件代码生成引擎，集成了现代前端技术栈和多种 AI 模型能力，你可以基于 Compoder 定制基于特定技术栈（如：React、Vue、Mui、Antd、Element-Plus、Tailwind CSS、Shadcn UI...），以及特定场景（如：Landing Page、邮件模版、后台表单组件）的 AI 驱动的组件代码生成器。
 
-<p align="center">
-    <a href="https://github.com/IamLiuLv/compoder" target="_blank">
-        <img alt="Static Badge" src="https://img.shields.io/badge/open-source?logo=github&color=%20%23155EEF&label=source&labelColor=%20%23528bff"></a>
-    <a href="https://github.com/IamLiuLv/compoder/discussions" target="_blank">
-        <img alt="GitHub Discussions" src="https://img.shields.io/badge/discussions-5865F2?logo=github&logoColor=white&style=flat"></a>
-    <a href="#社区与支持" target="_blank">
-        <img alt="Community Support" src="https://img.shields.io/badge/Community-Support-5865F2?logo=wechat&logoColor=white&style=flat"></a>
-    <a href="https://github.com/IamLiuLv/compoder/issues" target="_blank">
-        <img alt="GitHub Issues" src="https://img.shields.io/badge/issues-fc8203?logo=github&logoColor=white&style=flat"></a>
+    <
+
 </p>
 
 <p align="center">
@@ -102,8 +94,6 @@ Compoder 是一个开源的 AI 驱动组件代码生成引擎，集成了现代�
 
 ```bash
 # 克隆仓库
-git clone https://github.com/IamLiuLv/compoder.git
-cd compoder
 
 # 安装依赖
 pnpm install
@@ -199,12 +189,6 @@ Compoder 基于以下开源项目构建：
 
 ## 社区与支持
 
-- [GitHub 讨论](https://github.com/IamLiuLv/compoder/discussions) 👉：最适合分享反馈和提问。
-- [GitHub Issues](https://github.com/IamLiuLv/compoder/issues) 👉：最适合报告 bugs 和提出功能建议。
-- [微信](./assets/wechat.png)：扫描下方二维码，添加微信好友，备注：Compoder，拉你进入 Compoder 社区，我们会在社区中分享 Compoder 的最新动态、技术分享、组件代码生成器模板，以及寻找长期合作伙伴。
-
-<img src="./assets/wechat.png" alt="compoder" width="100px">
-
 ## Contributing
 
 对于想为 Compoder 做出贡献的贡献者们，我们欢迎您提交 PR 和 Issue，我们将在第一时间进行审核和反馈。
@@ -214,10 +198,6 @@ Compoder 基于以下开源项目构建：
 **Contributors**
 
 感谢所有为 Compoder 做出贡献的贡献者们，是你们的努力让 Compoder 变得更好。
-
-<a href="https://github.com/IamLiuLv/compoder/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=IamLiuLv/compoder" />
-</a>
 
 ## 安全问题
 

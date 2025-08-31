@@ -115,7 +115,7 @@
       " in the bottom right corner to fix the issue. If you think this is a bug,
       please
       <a
-        href="https://github.com/IamLiuLv/compoder/issues"
+        href="#"
         target="_blank"
         rel="noopener noreferrer"
         :style="{ color: '#666', textDecoration: 'underline' }"

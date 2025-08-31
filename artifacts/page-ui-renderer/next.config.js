@@ -13,6 +13,7 @@ const ContentSecurityPolicy = `
   media-src *.s3.amazonaws.com *.shipixen.com *.googleapis.com;
   connect-src *;
   font-src 'self' *.googleapis.com *.gstatic.com;
+  worker-src 'self' blob:;
 `;
 
 const securityHeaders = [

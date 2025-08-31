@@ -23,6 +23,31 @@ export const SearchProvider = ({ children }) => {
       kbarConfig={{
         searchDocumentsPath: 'search.json',
         onSearchDocumentsLoad(json) {
+          // 容错处理：确保 json 是数组格式
+          let posts: CoreContent<Blog>[] = [];
+
+          try {
+            if (Array.isArray(json)) {
+              posts = json;
+            } else if (json && typeof json === 'object') {
+              // 如果是对象，尝试提取数组值
+              const values = Object.values(json);
+              posts = values.filter(
+                (item): item is CoreContent<Blog> =>
+                  item &&
+                  typeof item === 'object' &&
+                  'path' in item &&
+                  'title' in item,
+              );
+            }
+          } catch (error) {
+            console.warn(
+              'SearchProvider: Failed to process search documents:',
+              error,
+            );
+            posts = [];
+          }
+
           return [
             ...searchLinks.map((link) => {
               return {
@@ -34,7 +59,7 @@ export const SearchProvider = ({ children }) => {
               };
             }),
 
-            ...json.map((post: CoreContent<Blog>) => ({
+            ...posts.map((post: CoreContent<Blog>) => ({
               id: post.path,
               name: post.title,
               keywords: post?.summary || '',

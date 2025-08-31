@@ -52,9 +52,9 @@ const ComponentCodeVersionsContainer = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-sm max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px] xl:max-w-[350px] truncate hover:cursor-help">
+                <span className="text-sm max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px] xl:max-w-[350px] truncate hover:cursor-help block">
                   {prompt.text}
-                </p>
+                </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -138,7 +138,7 @@ const ComponentCodeVersionsContainer = ({
             </svg>
           </div>
 
-          <p className="w-fit flex items-center gap-2 py-2 px-4 rounded-lg bg-gray-50 dark:bg-gray-800 mb-4">
+          <div className="w-fit flex items-center gap-2 py-2 px-4 rounded-lg bg-gray-50 dark:bg-gray-800 mb-4">
             <MessageCircleMore className="w-5 h-5" />
             <Separator
               orientation="vertical"
@@ -149,7 +149,7 @@ const ComponentCodeVersionsContainer = ({
                 <div key={index}>{renderPrompt(prompt)}</div>
               ))}
             </div>
-          </p>
+          </div>
 
           {children}
         </div>
