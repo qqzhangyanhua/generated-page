@@ -2,14 +2,14 @@ import { NextRequest } from "next/server"
 import { findCodegenById } from "@/lib/db/codegen/selectors"
 import { CodegenApi } from "../types"
 import { connectToDatabase } from "@/lib/db/mongo"
-import { validateSession } from "@/lib/auth/middleware"
+import { validateJWTSession } from "@/lib/auth/jwt-middleware"
 
 export async function GET(request: NextRequest) {
   try {
-    // Add identity verification check
-    const authError = await validateSession()
-    if (authError) {
-      return authError
+    // 验证JWT认证
+    const { error } = await validateJWTSession(request)
+    if (error) {
+      return error
     }
 
     await connectToDatabase()

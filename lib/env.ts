@@ -12,6 +12,10 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string().min(1),
     GITHUB_ID: z.string().min(1),
     GITHUB_SECRET: z.string().min(1),
+    // JWT 认证配置
+    JWT_SECRET: z.string().min(1),
+    JWT_EXPIRES_IN: z.string().default("7d"),
+    JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
   },
   client: {
     // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),

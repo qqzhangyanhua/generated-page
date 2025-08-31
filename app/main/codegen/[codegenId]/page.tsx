@@ -1,11 +1,11 @@
 "use client"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipProvider,
+//   TooltipTrigger,
+// } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { AppHeader } from "@/components/biz/AppHeader"
 import { ChatInput } from "@/components/biz/ChatInput"
@@ -13,7 +13,7 @@ import { CodegenGuide } from "@/components/biz/CodegenGuide"
 import { ComponentCodeFilterContainer } from "@/components/biz/ComponentCodeFilterContainer"
 import { ComponentCodeList } from "@/components/biz/ComponentCodeList"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
+// import { Button } from "@/components/ui/button"
 import TldrawEdit from "@/components/biz/TldrawEdit/TldrawEdit"
 import {
   useCodegenDetail,

@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2, AlertCircle } from "lucide-react"
+import getInstance from "@/app/services/request"
 
 interface ProviderModelModalProviderProps {
   children: React.ReactNode
@@ -69,10 +70,12 @@ export const ProviderModelModalProvider: React.FC<
   const refreshData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
+    
+    const request = getInstance()
 
     try {
       // First call the reload API to refresh the configuration
-      const reloadResponse = await fetch("/api/config/reload", {
+      const reloadResponse = await request("/config/reload", {
         method: "POST",
       })
 
@@ -80,7 +83,7 @@ export const ProviderModelModalProvider: React.FC<
         throw new Error(`Reload API error: ${reloadResponse.status}`)
       }
 
-      // Then fetch the updated configuration
+      // Then fetch the updated configuration (this endpoint doesn't require auth)
       const response = await fetch("/api/config")
 
       if (!response.ok) {

@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import { listComponentCodes } from "@/lib/db/componentCode/selectors"
-import { getUserId, validateSession } from "@/lib/auth/middleware"
+import { validateJWTSession, getCurrentUserId } from "@/lib/auth/jwt-middleware"
 import { connectToDatabase } from "@/lib/db/mongo"
 
 export async function GET(req: NextRequest) {
   try {
-    // Add identity verification check
-    const authError = await validateSession()
-    if (authError) {
-      return authError
+    // 验证JWT认证
+    const { error } = await validateJWTSession(req)
+    if (error) {
+      return error
     }
 
     await connectToDatabase()
 
-    const userId = await getUserId()
+    const userId = await getCurrentUserId(req)
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
 
     const searchParams = req.nextUrl.searchParams
     const codegenId = searchParams.get("codegenId") || ""

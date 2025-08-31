@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { deleteComponentCode } from "@/lib/db/componentCode/mutations"
-import { validateSession } from "@/lib/auth/middleware"
+import { validateJWTSession } from "@/lib/auth/jwt-middleware"
 import { connectToDatabase } from "@/lib/db/mongo"
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
-    // 1. Validate session
-    const authError = await validateSession()
-    if (authError) {
-      return authError
+    // 1. 验证JWT认证
+    const { error } = await validateJWTSession(request)
+    if (error) {
+      return error
     }
 
     // 2. Connect to database

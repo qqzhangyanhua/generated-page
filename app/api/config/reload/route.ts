@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 import { reloadAIProvidersConfig } from "@/lib/config/ai-providers"
-import { validateSession } from "@/lib/auth/middleware"
+import { validateAdminPermission } from "@/lib/auth/jwt-middleware"
 
 /**
  * API route that reloads the AI providers configuration from the config file
  * This is used when the configuration file has been updated and we need to reload it
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const authError = await validateSession()
+    const authError = await validateAdminPermission(request)
     if (authError) {
       return authError
     }

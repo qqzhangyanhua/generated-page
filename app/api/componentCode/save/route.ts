@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { saveComponentCodeVersion } from "@/lib/db/componentCode/mutations"
 import type { ComponentCodeApi } from "../type"
-import { validateSession } from "@/lib/auth/middleware"
+import { validateJWTSession } from "@/lib/auth/jwt-middleware"
 import { connectToDatabase } from "@/lib/db/mongo"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const authError = await validateSession()
-    if (authError) {
-      return authError
+    const { error } = await validateJWTSession(request)
+    if (error) {
+      return error
     }
 
     await connectToDatabase()

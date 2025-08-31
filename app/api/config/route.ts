@@ -4,7 +4,7 @@ import {
   AIProvider,
   ProcessedAIProviderConfig,
 } from "@/lib/config/ai-providers"
-import { validateSession } from "@/lib/auth/middleware"
+// import { validateSession } from "@/lib/auth/middleware" // 配置API无需认证
 
 export const dynamic = "force-dynamic"
 
@@ -14,10 +14,11 @@ export const dynamic = "force-dynamic"
  */
 export async function GET() {
   try {
-    const authError = await validateSession()
-    if (authError) {
-      return authError
-    }
+    // 配置API无需认证
+    // const authError = await validateSession()
+    // if (authError) {
+    //   return authError
+    // }
 
     // Get AI providers configuration using the utility function
     const aiProviders = getAIProviders()

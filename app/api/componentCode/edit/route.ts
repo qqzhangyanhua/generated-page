@@ -3,22 +3,27 @@ import { run, updateComponentWorkflow } from "@/app/api/ai-core/workflow"
 import { ComponentCodeApi } from "../type"
 import { findCodegenById } from "@/lib/db/codegen/selectors"
 import { getAIClient } from "@/app/api/ai-core/utils/aiClient"
-import { getUserId } from "@/lib/auth/middleware"
+import { validateJWTSession, getCurrentUserId } from "@/lib/auth/jwt-middleware"
 import { connectToDatabase } from "@/lib/db/mongo"
-import { validateSession } from "@/lib/auth/middleware"
 import { LanguageModel } from "ai"
 import { AIProvider } from "@/lib/config/ai-providers"
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = await validateSession()
-    if (authError) {
-      return authError
+    const { error } = await validateJWTSession(request)
+    if (error) {
+      return error
     }
 
     await connectToDatabase()
 
-    const userId = await getUserId()
+    const userId = await getCurrentUserId(request)
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
 
     const encoder = new TextEncoder()
     const stream = new TransformStream()

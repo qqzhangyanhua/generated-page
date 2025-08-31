@@ -3,7 +3,7 @@
 import React, { useCallback } from "react"
 import { Loading } from "@/components/biz/Loading"
 import useRoutes from "@/hooks/use-routes"
-import { useSession, signOut } from "next-auth/react"
+import { useSession, useAuth } from "@/lib/auth/AuthProvider"
 import { redirect } from "next/navigation"
 import { useEffect } from "react"
 import { AppSidebarLayout } from "@/components/biz/AppSidebarLayout"
@@ -21,24 +21,22 @@ function MainLayoutContent({
 }: {
   children: React.ReactNode
   user: {
-    name: string // 用户名
-    email: string // 用户邮箱
-    avatar: string // 用户头像
+    name: string
+    email: string
+    avatar: string
   }
 }) {
-  const routes = useRoutes() // 获取路由配置
-  const { openModal } = useProviderModelModal() // 获取模态框控制方法
+  const routes = useRoutes()
+  const { openModal } = useProviderModelModal()
+  const { logout } = useAuth()
 
-  // 处理导航项点击事件
   const handleNavItemClick = useCallback(
     (url: string) => {
-      // 如果点击的是设置项
       if (url === "/main/settings") {
-        openModal() // 打开设置模态框
-        return true // 返回 true 表示已处理，不需要进行导航
+        openModal()
+        return true
       }
 
-      // 返回 false 表示未处理，需要正常导航
       return false
     },
     [openModal],
@@ -48,7 +46,7 @@ function MainLayoutContent({
     <AppSidebarLayout
       navMain={routes as NavMainItem[]}
       user={user}
-      onLogout={signOut}
+      onLogout={logout}
       onNavItemClick={handleNavItemClick}
     >
       {children}
