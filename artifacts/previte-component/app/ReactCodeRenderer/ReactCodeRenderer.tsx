@@ -8,6 +8,10 @@ import {
   ModuleCache,
   ExportsObject,
 } from "./interface"
+import {
+  ensurePrivateComponentStyles,
+  observeStyleInjection,
+} from "../styleLoader"
 
 // 添加全局类型声明
 declare global {
@@ -32,6 +36,12 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // 确保私有组件样式被加载
+    ensurePrivateComponentStyles()
+
+    // 开始监听样式注入
+    const cleanup = observeStyleInjection()
+
     const modules: ModuleCache = {}
 
     const processFile = (filename: string): any => {
@@ -255,6 +265,11 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({
     }
 
     parseComponents()
+
+    // 清理函数
+    return () => {
+      if (cleanup) cleanup()
+    }
   }, [files, entryFile, customRequire, onError])
 
   if (error) {
@@ -267,7 +282,10 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({
 
   return (
     <ErrorBoundary onError={onError} files={files}>
-      <Component />
+      {/* 使用 React.Suspense 确保样式加载完成 */}
+      <React.Suspense fallback={<div>Loading styles...</div>}>
+        <Component />
+      </React.Suspense>
     </ErrorBoundary>
   )
 }

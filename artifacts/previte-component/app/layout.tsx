@@ -20,7 +20,11 @@ export default function RootLayout({
         <script src="https://cdn.tailwindcss.com"></script>
       </head>
       <body>
-        <AntdRegistry>{children}</AntdRegistry>
+        <AntdRegistry>
+          {/* 确保私有组件样式能够正确注入 */}
+          <style id="private-components-styles" />
+          {children}
+        </AntdRegistry>
       </body>
     </html>
   )
