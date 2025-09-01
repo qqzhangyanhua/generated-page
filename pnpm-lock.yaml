@@ -140,6 +140,9 @@ importers:
       ollama-ai-provider:
         specifier: ^1.2.0
         version: 1.2.0(zod@3.24.2)
+      openai:
+        specifier: ^5.16.0
+        version: 5.16.0(zod@3.24.2)
       react:
         specifier: ^18
         version: 18.3.1
@@ -23628,6 +23631,21 @@ packages:
       is-docker: 2.2.1
       is-wsl: 2.2.0
     dev: true
+
+  /openai@5.16.0(zod@3.24.2):
+    resolution: {integrity: sha512-hoEH8ZNvg1HXjU9mp88L/ZH8O082Z8r6FHCXGiWAzVRrEv443aI57qhch4snu07yQydj+AUAWLenAiBXhu89Tw==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+    dependencies:
+      zod: 3.24.2
+    dev: false
 
   /opener@1.5.2:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}

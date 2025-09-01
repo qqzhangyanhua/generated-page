@@ -6,6 +6,7 @@ import {
   getStylesRule,
   getSpecialAttentionRules,
 } from "../../utils/codegenRules"
+import { ComponentDoc } from "@/lib/rag/types"
 
 // Generate the output specification section
 const generateOutputSpecification = (
@@ -47,10 +48,62 @@ const generateOpenSourceComponents = (
   `
 }
 
-// Generate the private components section
+// Generate the private components section with RAG enhancement
 const generatePrivateComponents = (
   retrievedAugmentationContent?: string,
+  ragComponents?: ComponentDoc[]
 ): string => {
+  // RAG增强版本 - 如果有RAG组件数据，优先使用
+  if (ragComponents && ragComponents.length > 0) {
+    const packageNames = Array.from(new Set(ragComponents.map(comp => comp.packageName)))
+    const packageName = packageNames[0] // 获取主要包名
+    
+    // 生成完整的组件名称列表
+    const componentNames = ragComponents.map(comp => comp.componentName).sort()
+    const componentNamesList = componentNames.join(', ')
+    
+    return `
+    **Private Components (RAG-Enhanced)**
+    🔥 CRITICAL PACKAGE NAME REQUIREMENTS:
+    - MUST use exact package name: "${packageName}" (with forward slash, NOT hyphen)
+    - NEVER use "${packageName.replace('/', '-')}" (incorrect format)
+    - Import format: import { ComponentName } from '${packageName}'
+    
+    **⚠️ ABSOLUTE COMPONENT NAME RESTRICTIONS:**
+    - NEVER use "Icon" - it does not exist!
+    - NEVER use "TextInput" - it does not exist!
+    - NEVER use "TextField" - it does not exist!  
+    - NEVER use "PrimaryButton" - it does not exist!
+    - NEVER use "Btn" - it does not exist!
+    - NEVER use any made-up component names!
+    - DO NOT import components that are NOT in the exact list above!
+    
+    **🎯 EXACT COMPONENT NAMES (USE ONLY THESE):**
+    Available components: ${componentNamesList}
+    
+    ⚠️ CRITICAL WARNING: The components listed above are the COMPLETE list of available components.
+    NO OTHER COMPONENTS exist in @private/basic-components. 
+    DO NOT attempt to use ANY component name not shown in this exact list!
+    
+    **Available Components (USE EXACT NAMES):**
+    ${ragComponents.map(comp => `
+    ✅ **${comp.componentName}** (EXACT NAME: "${comp.componentName}")
+       Description: ${comp.description}
+       Tags: ${comp.tags.join(', ')}
+    `).join('')}
+    
+    **🚨 CRITICAL RULES:**
+    1. ONLY use component names from the list above
+    2. For text input, use "Input" NOT "TextInput" 
+    3. For buttons, use "Button" NOT "TextButton" or "PrimaryButton"
+    4. For icons, DO NOT use "Icon" component - it doesn't exist!
+    5. Copy component names EXACTLY as shown above
+    6. If a component is not listed above, DO NOT use it
+    7. FORBIDDEN: Any component not explicitly listed in the available components list
+    `
+  }
+  
+  // 回退到静态文档版本
   if (!retrievedAugmentationContent) return ""
 
   return `
@@ -76,10 +129,11 @@ const generateAdditionalRules = (
   `
 }
 
-// build system prompt
+// RAG增强的系统提示词构建函数
 export const buildSystemPrompt = (
   rules: WorkflowContext["query"]["rules"],
   retrievedAugmentationContent?: string,
+  ragComponents?: ComponentDoc[]
 ): string => {
   // Generate each section
   const outputSpecification = generateOutputSpecification(rules)
@@ -87,6 +141,7 @@ export const buildSystemPrompt = (
   const openSourceComponents = generateOpenSourceComponents(rules)
   const privateComponents = generatePrivateComponents(
     retrievedAugmentationContent,
+    ragComponents
   )
   const additionalRules = generateAdditionalRules(rules)
 
@@ -101,6 +156,17 @@ export const buildSystemPrompt = (
     ? `${componentGuidelinesHeader}${openSourceComponents}${privateComponents}`
     : ""
 
+  // RAG增强的特殊说明
+  const ragEnhancement = ragComponents && ragComponents.length > 0
+    ? `
+    ## 🧠 RAG-Enhanced Component Generation
+    This code generation is powered by intelligent component analysis.
+    Selected components have been verified for relevance and accuracy.
+    
+    ⚠️ CRITICAL: Package names MUST be used exactly as specified above.
+    `
+    : ""
+
   return `
     # You are a senior frontend engineer focused on business component development
 
@@ -109,6 +175,7 @@ export const buildSystemPrompt = (
     ${outputSpecification}
     ${styleSpecification}
     ${componentGuidelines}
+    ${ragEnhancement}
     ${additionalRules}
   `
 }

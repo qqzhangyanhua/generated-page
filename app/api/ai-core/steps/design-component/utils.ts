@@ -3,7 +3,10 @@ import { WorkflowContext } from "../../type"
 import {
   getPrivateComponentDocs,
   getPrivateDocsDescription,
+  getRagEnhancedRule,
 } from "../../utils/codegenRules"
+import { createRAGService, defaultRAGConfig } from "@/lib/rag/service/rag-service"
+import { ComponentDoc } from "@/lib/rag/types"
 
 export interface ComponentDesign {
   componentName: string
@@ -14,79 +17,33 @@ export interface ComponentDesign {
     description: string
   }>
   retrievedAugmentationContent?: string
+  ragComponents?: ComponentDoc[] // RAG检索到的组件
+  ragConfidence?: number // RAG检索置信度
 }
 
-const buildSystemPrompt = (rules: WorkflowContext["query"]["rules"]) => {
-  const componentsDescription = getPrivateDocsDescription(rules)
-  const hasComponentLibraries = !!componentsDescription
+// buildSystemPrompt function removed - replaced by RAG-enhanced system prompts
 
-  // create prompt parts for different situations
-  const promptParts = {
-    withLibraries: {
-      goal: 'Extract the "basic component materials", component name, and description information needed to develop business components from business requirements and design drafts.',
-      constraints: `Basic component materials include:
-    ${componentsDescription}
-    Please note: You should not provide example code and any other text in your response, only provide XML response.`,
-      responseFormat: `<ComponentDesign>
-  <ComponentName>Component name</ComponentName>
-  <ComponentDescription>Component description</ComponentDescription>
-  <Libraries>
-    <Library>
-      <Name>Library name</Name>
-      <Components>
-        <Component>Component name 1</Component>
-        <Component>Component name 2</Component>
-        <!-- More components as needed -->
-      </Components>
-      <Description>Describe how each component in components is used in a table format</Description>
-    </Library>
-    <!-- More libraries as needed -->
-  </Libraries>
-</ComponentDesign>`,
-      workflowStep2:
-        "2. Extract required materials from [Constraints] basic component materials for developing business components",
-    },
-    withoutLibraries: {
-      goal: "Extract component name and description information needed to develop business components from business requirements and design drafts.",
-      constraints: `- Extract the component name and description information from the business requirements and design drafts. 
-- Analyze the design draft to understand the business functionality needed.
-
-Please note: You should not provide example code and any other text in your response, only provide XML response.`,
-      responseFormat: `<ComponentDesign>
-  <ComponentName>Component name</ComponentName>
-  <ComponentDescription>Component description that clearly explains the purpose and functionality</ComponentDescription>
-</ComponentDesign>`,
-      workflowStep2:
-        "2. Analyze the business requirements and design drafts to identify needed business components and their functions",
-    },
-  }
-
-  // select the prompt part for the corresponding situation
-  const parts = hasComponentLibraries
-    ? promptParts.withLibraries
-    : promptParts.withoutLibraries
-
-  // build the workflow steps
-  const workflowSteps = `1. Accept user's business requirements or design draft images
-    ${parts.workflowStep2}
-    3. Generate and return the XML response in the specified format`
-
-  // build the final prompt
+/**
+ * 构建初始分析的系统提示词
+ */
+function buildInitialAnalysisPrompt(): string {
   return `
-    # You are a senior frontend engineer who excels at developing business components.
-    
+    # You are a senior frontend engineer specializing in component analysis
+
     ## Goal
-    ${parts.goal}
+    Analyze the user's requirements and extract key information about the component they want to build.
     
-    ## Constraints
-    ${parts.constraints}
+    ## Task
+    Based on the user's input, provide a detailed analysis including:
+    1. Component purpose and functionality
+    2. Key features required
+    3. UI/UX requirements
+    4. Data handling needs
+    5. Interaction patterns
     
     ## Response Format
-    You must respond with an XML structure in the following format:
-    ${parts.responseFormat}
-    
-    ## Workflow
-    ${workflowSteps}
+    Provide a concise but comprehensive analysis in plain text (no XML).
+    Focus on technical requirements and component characteristics.
   `
 }
 
@@ -176,6 +133,257 @@ ${componentDescriptions.trim()}
   return templates.join("\n\n")
 }
 
+/**
+ * 执行RAG搜索
+ */
+async function performRAGSearch(
+  query: string,
+  rules: WorkflowContext["query"]["rules"]
+): Promise<{ components: ComponentDoc[], confidence: number } | null> {
+  try {
+    // 检查是否启用RAG
+    const ragConfig = getRagEnhancedRule(rules)
+    if (!ragConfig) {
+      console.log('RAG not enabled in rules')
+      return null
+    }
+
+    // 获取环境配置
+    const config = {
+      ...defaultRAGConfig,
+      openai: {
+        apiKey: process.env.OPENAI_API_KEY || '',
+        model: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small'
+      }
+    }
+
+    if (!config.openai.apiKey) {
+      console.warn('OpenAI API key not configured for RAG search')
+      return null
+    }
+
+    const sourcePath = process.env.PRIVATE_COMPONENTS_SOURCE_PATH || 
+      '/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components'
+
+    const ragService = createRAGService(config, sourcePath)
+    await ragService.initialize()
+
+    const result = await ragService.searchComponents({
+      query,
+      topK: ragConfig.searchConfig.topK,
+      threshold: ragConfig.searchConfig.threshold,
+      filters: ragConfig.searchConfig.filters
+    })
+
+    return {
+      components: result.components,
+      confidence: result.confidence
+    }
+  } catch (error) {
+    console.error('RAG search failed:', error)
+    return null
+  }
+}
+
+/**
+ * 构建RAG增强的系统提示词
+ */
+function buildRAGEnhancedSystemPrompt(
+  rules: WorkflowContext["query"]["rules"],
+  ragComponents?: ComponentDoc[]
+): string {
+  const componentsDescription = getPrivateDocsDescription(rules)
+  const hasStaticLibraries = !!componentsDescription
+  const hasRAGComponents = ragComponents && ragComponents.length > 0
+
+  if (hasRAGComponents) {
+    // RAG增强版本
+    const ragComponentsList = ragComponents
+      .map(comp => `{componentName: ${comp.componentName}, description: ${comp.description}}`)
+      .join('\n  ')
+    
+    const componentNames = ragComponents.map(comp => comp.componentName).sort()
+
+    return `
+      # You are a senior frontend engineer specializing in component design analysis
+      
+      ## Goal  
+      Extract the "basic component materials", component name, and description from the analyzed requirements.
+      
+      ## Available Components (RAG-Enhanced)
+      You have access to the following verified components from @private/basic-components:
+      ---------------------
+      CRITICAL: These components have been intelligently selected for your use case. 
+      The package name is "@private/basic-components" (with forward slash, NOT hyphen).
+      
+      🚨 FORBIDDEN COMPONENT NAMES (DO NOT USE):
+      - Icon (doesn't exist - no icon component available)
+      - TextInput (doesn't exist - use "Input" instead)
+      - TextField (doesn't exist - use "Input" instead)  
+      - PrimaryButton (doesn't exist - use "Button" instead)
+      - Btn (doesn't exist - use "Button" instead)
+      
+      🎯 ALLOWED COMPONENT NAMES ONLY:
+      ${componentNames.join(', ')}
+      
+      ⚠️ CRITICAL WARNING: The components listed above are the COMPLETE list of available components.
+      NO OTHER COMPONENTS exist in @private/basic-components. 
+      DO NOT attempt to use ANY component name not shown in this exact list!
+      
+      EXACT COMPONENT NAMES TO USE:
+      ${ragComponentsList}
+      
+      🚨 STRICT NAMING REQUIREMENTS:
+      - Use ONLY the exact component names listed above
+      - DO NOT use variations like "TextInput" - use "Input" instead
+      - DO NOT use variations like "PrimaryButton" - use "Button" instead
+      - DO NOT create new component names
+      ---------------------
+      
+      ## Instructions
+      1. Select ONLY components from the list above that match your requirements
+      2. The package name MUST be "@private/basic-components" (exact format)
+      3. Component names MUST match exactly as listed
+      4. Do not invent or modify component names
+      5. If you need a text input field, use "Input" (not TextInput, TextField, etc.)
+      6. If you need a button, use "Button" (not Btn, PrimaryButton, etc.)
+      7. If you need an icon, DO NOT use "Icon" component - it doesn't exist!
+      8. CRITICAL: Never import components that are not in the exact list above
+      
+      ## Response Format
+      <ComponentDesign>
+        <ComponentName>Component name</ComponentName>
+        <ComponentDescription>Component description</ComponentDescription>
+        <Libraries>
+          <Library>
+            <Name>@private/basic-components</Name>
+            <Components>
+              <Component>Exact component name from list above</Component>
+              <!-- More components as needed -->
+            </Components>
+            <Description>Describe how each component will be used</Description>
+          </Library>
+        </Libraries>
+      </ComponentDesign>
+    `
+  }
+  
+  if (hasStaticLibraries) {
+    // 静态文档版本
+    return `
+      # You are a senior frontend engineer specializing in component design
+      
+      ## Goal
+      Extract the "basic component materials", component name, and description information needed to develop business components from business requirements and design drafts.
+      
+      ## Constraints
+      Basic component materials include:
+      ${componentsDescription}
+      Please note: You should not provide example code and any other text in your response, only provide XML response.
+      
+      ## Response Format
+      <ComponentDesign>
+        <ComponentName>Component name</ComponentName>
+        <ComponentDescription>Component description</ComponentDescription>
+        <Libraries>
+          <Library>
+            <Name>Library name</Name>
+            <Components>
+              <Component>Component name 1</Component>
+              <Component>Component name 2</Component>
+              <!-- More components as needed -->
+            </Components>
+            <Description>Describe how each component in components is used in a table format</Description>
+          </Library>
+          <!-- More libraries as needed -->
+        </Libraries>
+      </ComponentDesign>
+    `
+  }
+
+  // 无组件库版本  
+  return `
+    # You are a senior frontend engineer specializing in component design
+    
+    ## Goal
+    Extract component name and description information needed to develop business components from business requirements and design drafts.
+    
+    ## Response Format
+    <ComponentDesign>
+      <ComponentName>Component name</ComponentName>
+      <ComponentDescription>Component description that clearly explains the purpose and functionality</ComponentDescription>
+    </ComponentDesign>
+  `
+}
+
+/**
+ * 构建RAG上下文消息
+ */
+function buildRAGContextMessage(components: ComponentDoc[], confidence: number): string {
+  return `
+    Based on intelligent component analysis (confidence: ${(confidence * 100).toFixed(1)}%), 
+    the following components have been identified as highly relevant for your requirements:
+
+    ${components.map(comp => `
+    - **${comp.componentName}** (from ${comp.packageName})
+      Purpose: ${comp.description}
+      Tags: ${comp.tags.join(', ')}
+    `).join('')}
+
+    Please select the most appropriate components from this curated list for your component design.
+    Remember: The package name is "${components[0]?.packageName}" (exact format required).
+  `
+}
+
+/**
+ * 生成RAG增强的文档内容
+ */
+function generateRAGAugmentationContent(
+  ragComponents: ComponentDoc[],
+  selectedLibraries: ComponentDesign['library']
+): string {
+  const templates: string[] = []
+
+  for (const lib of selectedLibraries) {
+    const namespace = lib.name
+    const selectedComponents = lib.components
+
+    // 从RAG结果中找到匹配的组件
+    const matchingComponents = ragComponents.filter(comp => 
+      comp.packageName === namespace && 
+      selectedComponents.includes(comp.componentName)
+    )
+
+    if (matchingComponents.length > 0) {
+      let componentDescriptions = ""
+
+      for (const component of matchingComponents) {
+        componentDescriptions += `
+${component.componentName}: ${component.api}
+
+Examples:
+${component.examples.slice(0, 2).map(example => `\`\`\`tsx\n${example}\n\`\`\``).join('\n')}
+`
+      }
+
+      const template = `
+The following content describes the usage of components in the ${namespace} library
+---------------------
+CRITICAL: Package name is "${namespace}" (exact format - with forward slash, not hyphen)
+
+${componentDescriptions.trim()}
+---------------------
+`
+      templates.push(template.trim())
+    }
+  }
+
+  return templates.join("\n\n")
+}
+
+/**
+ * RAG增强的组件设计生成函数
+ */
 export async function generateComponentDesign(
   req: WorkflowContext,
 ): Promise<ComponentDesign> {
@@ -185,19 +393,59 @@ export async function generateComponentDesign(
     library: [],
   }
 
-  const systemPrompt = buildSystemPrompt(req.query.rules)
-
-  console.log("design-component systemPrompt:", systemPrompt)
+  // 1. 首次AI调用：分析用户需求
+  req.stream.write("🔍 Analyzing user requirements...\n")
+  
+  const initialSystemPrompt = buildInitialAnalysisPrompt()
   const messages = [
     ...buildCurrentComponentMessage(req.query.component),
     ...buildUserMessage(req.query.prompt),
   ]
 
+  const initialStream = await streamText({
+    system: initialSystemPrompt,
+    model: req.query.aiModel,
+    messages,
+  })
+
+  let initialAnalysis = ""
+  for await (const part of initialStream.textStream) {
+    initialAnalysis += part || ""
+  }
+
+  // 2. RAG检索相关组件
+  req.stream.write("🧠 Searching for relevant components using RAG...\n")
+  
+  const ragResult = await performRAGSearch(initialAnalysis, req.query.rules)
+  
+  if (ragResult) {
+    req.stream.write(`✅ Found ${ragResult.components.length} relevant components (confidence: ${(ragResult.confidence * 100).toFixed(1)}%)\n`)
+  } else {
+    req.stream.write("⚠️  RAG search failed, falling back to static docs\n")
+  }
+
+  // 3. 基于RAG结果的精确设计
+  req.stream.write("🎨 Generating precise component design...\n")
+  
+  const enhancedSystemPrompt = buildRAGEnhancedSystemPrompt(req.query.rules, ragResult?.components)
+  
+  const finalMessages: CoreMessage[] = [
+    ...messages,
+    {
+      role: "assistant",
+      content: `Initial analysis: ${initialAnalysis}`
+    },
+    {
+      role: "user",
+      content: ragResult ? buildRAGContextMessage(ragResult.components, ragResult.confidence) : "Proceed with standard component selection."
+    }
+  ]
+
   try {
     const stream = await streamText({
-      system: systemPrompt,
+      system: enhancedSystemPrompt,
       model: req.query.aiModel,
-      messages,
+      messages: finalMessages,
     })
 
     let accumulatedXml = ""
@@ -229,14 +477,31 @@ export async function generateComponentDesign(
 
       // Parse the XML
       parserCompletion = transformComponentDesignFromXml(xmlMatch[0])
+      
+      // 添加RAG相关信息
+      if (ragResult) {
+        parserCompletion.ragComponents = ragResult.components
+        parserCompletion.ragConfidence = ragResult.confidence
+      }
+      
     } catch (parseError) {
       throw new Error(`Failed to parse AI response as valid XML: ${parseError}`)
     }
 
+    // 生成增强的文档内容
     if (parserCompletion.library.length > 0) {
-      const docs = getPrivateComponentDocs(req.query.rules)
-      parserCompletion.retrievedAugmentationContent =
-        getRetrievedAugmentationContent(docs, parserCompletion.library)
+      if (ragResult && ragResult.components.length > 0) {
+        // 使用RAG结果生成文档
+        parserCompletion.retrievedAugmentationContent = generateRAGAugmentationContent(
+          ragResult.components, 
+          parserCompletion.library
+        )
+      } else {
+        // 回退到静态文档
+        const docs = getPrivateComponentDocs(req.query.rules)
+        parserCompletion.retrievedAugmentationContent =
+          getRetrievedAugmentationContent(docs, parserCompletion.library)
+      }
     }
 
     return parserCompletion

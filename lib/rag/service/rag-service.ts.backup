@@ -1,0 +1,434 @@
+import {
+  ComponentDoc,
+  VectorDocument,
+  RAGConfig,
+  RAGSearchRequest,
+  RAGSearchResponse,
+  RAGServiceStatus,
+  ComponentSyncRequest,
+  ComponentSyncResponse,
+  RAGError
+} from '../types'
+import { ComponentParser } from '../parsers/component-parser'
+import { OpenAIEmbeddings } from '../embeddings/openai-embeddings'
+import { FileVectorStore } from '../vector-store/file-store'
+
+/**
+ * RAG核心服务
+ * 集成组件解析、向量化、存储和检索功能
+ */
+export class RAGService {
+  private embeddings: OpenAIEmbeddings
+  private vectorStore: FileVectorStore
+  private parser: ComponentParser
+  private config: RAGConfig
+  private cache: Map<string, { result: RAGSearchResponse; timestamp: number }>
+
+  constructor(config: RAGConfig, sourcePath: string) {
+    this.config = config
+    this.cache = new Map()
+
+    // 初始化组件
+    this.embeddings = new OpenAIEmbeddings(
+      config.openai?.apiKey || '',
+      config.openai?.model || 'text-embedding-3-small'
+    )
+
+    this.vectorStore = new FileVectorStore('./data/rag-index')
+    this.parser = new ComponentParser(sourcePath)
+  }
+
+  /**
+   * 初始化服务
+   */
+  async initialize(): Promise<void> {
+    try {
+      await this.vectorStore.initialize()
+    } catch (error) {
+      throw new RAGError(
+        `Failed to initialize RAG service: ${error}`,
+        'INIT_ERROR'
+      )
+    }
+  }
+
+  /**
+   * 同步组件文档
+   */
+  async syncComponents(request: ComponentSyncRequest): Promise<ComponentSyncResponse> {
+    const startTime = Date.now()
+    let processedCount = 0
+    let successCount = 0
+    const errors: string[] = []
+
+    try {
+      // 解析组件
+      const parsedComponents = await this.parser.parseAllComponents()
+      processedCount = parsedComponents.length
+
+      // 过滤需要同步的包
+      const componentsToSync = request.packages
+        ? parsedComponents.filter(comp => 
+            request.packages!.includes(comp.info.packageName)
+          )
+        : parsedComponents
+
+      // 如果强制重新索引，清空现有数据
+      if (request.forceReindex) {
+        await this.vectorStore.clear()
+      }
+
+      // 批量向量化和存储
+      const vectorDocuments: VectorDocument[] = []
+
+      for (const parsedComp of componentsToSync) {
+        try {
+          if (parsedComp.status === 'success') {
+            const vectors = await this.createComponentVectors(parsedComp.info)
+            vectorDocuments.push(...vectors)
+            successCount++
+          } else {
+            errors.push(`${parsedComp.info.componentName}: ${parsedComp.error || 'Parse failed'}`)
+          }
+        } catch (error) {
+          errors.push(`${parsedComp.info.componentName}: ${error}`)
+        }
+      }
+
+      // 存储到向量数据库
+      if (vectorDocuments.length > 0) {
+        await this.vectorStore.addDocuments(vectorDocuments)
+      }
+
+      // 清空缓存
+      this.clearCache()
+
+      return {
+        status: errors.length === 0 ? 'success' : (successCount > 0 ? 'partial' : 'failed'),
+        processedCount,
+        successCount,
+        failedCount: processedCount - successCount,
+        errors,
+        duration: Date.now() - startTime
+      }
+    } catch (error) {
+      return {
+        status: 'failed',
+        processedCount,
+        successCount,
+        failedCount: processedCount - successCount,
+        errors: [...errors, `Sync error: ${error}`],
+        duration: Date.now() - startTime
+      }
+    }
+  }
+
+  /**
+   * 搜索相关组件
+   */
+  async searchComponents(request: RAGSearchRequest): Promise<RAGSearchResponse> {
+    const startTime = Date.now()
+
+    try {
+      // 检查缓存
+      const cacheKey = this.getCacheKey(request)
+      if (this.config.cache?.enabled) {
+        const cached = this.cache.get(cacheKey)
+        if (cached && Date.now() - cached.timestamp < (this.config.cache.ttl * 1000)) {
+          return {
+            ...cached.result,
+            duration: Date.now() - startTime
+          }
+        }
+      }
+
+      // 生成查询向量
+      const queryEmbedding = await this.embeddings.embedText(request.query)
+
+      // 向量检索
+      const vectorResults = request.filters
+        ? await this.vectorStore.searchWithFilters(
+            queryEmbedding,
+            request.filters,
+            request.topK || 10,
+            request.threshold || 0.5
+          )
+        : await this.vectorStore.similaritySearch(
+            queryEmbedding,
+            request.topK || 10,
+            request.threshold || 0.5
+          )
+
+      // 合并相同组件的结果
+      const componentMap = new Map<string, {
+        component: ComponentDoc
+        scores: number[]
+        totalScore: number
+      }>()
+
+      for (const doc of vectorResults) {
+        const componentKey = `${doc.metadata.packageName}-${doc.metadata.componentName}`
+        
+        if (!componentMap.has(componentKey)) {
+          // 从向量文档重建ComponentDoc
+          const component = await this.reconstructComponentDoc(doc.metadata)
+          componentMap.set(componentKey, {
+            component,
+            scores: [this.calculateRelevanceScore(doc, request.query)],
+            totalScore: 0
+          })
+        } else {
+          const existing = componentMap.get(componentKey)!
+          existing.scores.push(this.calculateRelevanceScore(doc, request.query))
+        }
+      }
+
+      // 计算最终得分并排序
+      const results = Array.from(componentMap.values())
+        .map(item => ({
+          ...item,
+          totalScore: Math.max(...item.scores) * 0.7 + (item.scores.reduce((a, b) => a + b, 0) / item.scores.length) * 0.3
+        }))
+        .sort((a, b) => b.totalScore - a.totalScore)
+        .slice(0, request.topK || 5)
+
+      const response: RAGSearchResponse = {
+        components: results.map(r => r.component),
+        scores: results.map(r => r.totalScore),
+        confidence: this.calculateConfidence(results.map(r => r.totalScore)),
+        suggestions: this.generateSuggestions(request.query, results.map(r => r.component)),
+        duration: Date.now() - startTime
+      }
+
+      // 缓存结果
+      if (this.config.cache?.enabled) {
+        this.cache.set(cacheKey, { result: response, timestamp: Date.now() })
+      }
+
+      return response
+    } catch (error) {
+      throw new RAGError(
+        `Search failed: ${error}`,
+        'SEARCH_ERROR'
+      )
+    }
+  }
+
+  /**
+   * 获取服务状态
+   */
+  async getStatus(): Promise<RAGServiceStatus> {
+    try {
+      const stats = await this.vectorStore.getStats()
+      
+      return {
+        available: true,
+        stats,
+        config: {
+          vectorStore: this.config.vectorStore,
+          embeddingModel: this.config.embeddingModel,
+          dimension: this.config.dimension,
+          cache: this.config.cache
+        },
+        checkedAt: new Date().toISOString()
+      }
+    } catch {
+      return {
+        available: false,
+        stats: {
+          totalComponents: 0,
+          totalDocuments: 0,
+          indexSize: 0,
+          lastUpdated: new Date().toISOString(),
+          packageStats: {}
+        },
+        config: {
+          vectorStore: this.config.vectorStore,
+          embeddingModel: this.config.embeddingModel,
+          dimension: this.config.dimension,
+          cache: this.config.cache
+        },
+        checkedAt: new Date().toISOString()
+      }
+    }
+  }
+
+  /**
+   * 清空缓存
+   */
+  clearCache(): void {
+    this.cache.clear()
+  }
+
+  /**
+   * 私有方法：为组件创建向量文档
+   */
+  private async createComponentVectors(component: ComponentDoc): Promise<VectorDocument[]> {
+    const vectors: VectorDocument[] = []
+    const baseMetadata = {
+      componentName: component.componentName,
+      packageName: component.packageName,
+      tags: component.tags,
+      version: component.version
+    }
+
+    try {
+      // 描述向量
+      if (component.description) {
+        const descriptionEmbedding = await this.embeddings.embedText(component.description)
+        vectors.push({
+          id: FileVectorStore.generateDocumentId(component.componentName, 'description', component.description),
+          content: component.description,
+          embedding: descriptionEmbedding,
+          metadata: { ...baseMetadata, type: 'description' }
+        })
+      }
+
+      // API向量
+      if (component.api && component.api !== 'API documentation not available') {
+        const apiEmbedding = await this.embeddings.embedText(component.api)
+        vectors.push({
+          id: FileVectorStore.generateDocumentId(component.componentName, 'api', component.api),
+          content: component.api,
+          embedding: apiEmbedding,
+          metadata: { ...baseMetadata, type: 'api' }
+        })
+      }
+
+      // 示例向量
+      for (let index = 0; index < component.examples.length; index++) {
+        const example = component.examples[index]
+        if (example.trim()) {
+          const exampleEmbedding = await this.embeddings.embedText(example)
+          vectors.push({
+            id: FileVectorStore.generateDocumentId(component.componentName, `example-${index}`, example),
+            content: example,
+            embedding: exampleEmbedding,
+            metadata: { ...baseMetadata, type: 'example' }
+          })
+        }
+      }
+
+      return vectors
+    } catch (error) {
+      throw new RAGError(
+        `Failed to create vectors for ${component.componentName}: ${error}`,
+        'VECTOR_CREATION_ERROR'
+      )
+    }
+  }
+
+  /**
+   * 私有方法：从元数据重建组件文档
+   */
+  private async reconstructComponentDoc(metadata: VectorDocument['metadata']): Promise<ComponentDoc> {
+    // 这里简化处理，实际应用中可能需要从数据库或缓存中获取完整信息
+    return {
+      packageName: metadata.packageName,
+      componentName: metadata.componentName,
+      description: `${metadata.componentName} component`,
+      api: 'API documentation available',
+      examples: [],
+      tags: metadata.tags,
+      version: metadata.version,
+      dependencies: [],
+      updatedAt: new Date().toISOString()
+    }
+  }
+
+  /**
+   * 私有方法：计算相关性得分
+   */
+  private calculateRelevanceScore(doc: VectorDocument, query: string): number {
+    // 基础得分从相似度计算，这里简化为随机值作为占位符
+    // 实际应该使用向量相似度
+    let score = 0.8
+
+    // 根据文档类型调整权重
+    if (doc.metadata.type === 'description') {
+      score *= 1.2
+    } else if (doc.metadata.type === 'api') {
+      score *= 1.0
+    } else if (doc.metadata.type === 'example') {
+      score *= 0.8
+    }
+
+    // 根据查询关键词匹配调整
+    const queryLower = query.toLowerCase()
+    const contentLower = doc.content.toLowerCase()
+    
+    if (contentLower.includes(queryLower)) {
+      score *= 1.3
+    }
+
+    return Math.min(score, 1.0)
+  }
+
+  /**
+   * 私有方法：计算整体置信度
+   */
+  private calculateConfidence(scores: number[]): number {
+    if (scores.length === 0) return 0
+    
+    const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length
+    const maxScore = Math.max(...scores)
+    
+    // 综合平均分和最高分
+    return avgScore * 0.6 + maxScore * 0.4
+  }
+
+  /**
+   * 私有方法：生成使用建议
+   */
+  private generateSuggestions(query: string, components: ComponentDoc[]): string[] {
+    const suggestions: string[] = []
+    
+    if (components.length === 0) {
+      suggestions.push('Try using more general terms in your search')
+      suggestions.push('Check if the component name is correct')
+    } else {
+      if (components.length === 1) {
+        suggestions.push(`Found perfect match: ${components[0].componentName}`)
+      } else {
+        suggestions.push(`Found ${components.length} relevant components`)
+        suggestions.push(`Top match: ${components[0].componentName}`)
+      }
+    }
+
+    return suggestions
+  }
+
+  /**
+   * 私有方法：生成缓存键
+   */
+  private getCacheKey(request: RAGSearchRequest): string {
+    return `${request.query}-${JSON.stringify(request.filters)}-${request.topK}-${request.threshold}`
+  }
+}
+
+/**
+ * 工厂函数：创建RAG服务实例
+ */
+export function createRAGService(
+  config: RAGConfig,
+  sourcePath: string
+): RAGService {
+  return new RAGService(config, sourcePath)
+}
+
+/**
+ * 默认配置
+ */
+export const defaultRAGConfig: RAGConfig = {
+  vectorStore: 'file',
+  embeddingModel: 'openai',
+  dimension: 1536,
+  cache: {
+    enabled: true,
+    ttl: 300 // 5分钟
+  },
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    model: 'text-embedding-3-small'
+  }
+}

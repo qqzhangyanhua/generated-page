@@ -160,3 +160,23 @@ export function getSpecialAttentionRules(rules: CodegenRule[]) {
     defaultAdditionalRules
   )
 }
+
+export function getRagEnhancedRule(rules: CodegenRule[]) {
+  const ragRule = rules.find(rule => rule.type === "rag-enhanced")
+  if (!ragRule || !ragRule.enabled) {
+    return null
+  }
+  
+  return {
+    enabled: ragRule.enabled,
+    vectorStore: ragRule.vectorStore || "file",
+    namespace: ragRule.namespace || "private-basic-components",
+    searchConfig: ragRule.searchConfig || {
+      topK: 8,
+      threshold: 0.3,
+      filters: {
+        packageName: "@private/basic-components"
+      }
+    }
+  }
+}

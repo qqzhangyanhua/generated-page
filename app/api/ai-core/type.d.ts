@@ -1,6 +1,7 @@
 import { CodegenRule } from "@/lib/db/codegen/types"
 import { LanguageModel } from "ai"
 import { Prompt } from "@/lib/db/componentCode/types"
+import { ComponentDoc } from "@/lib/rag/types"
 
 // 基础的查询类型
 type WorkflowQuery = {
@@ -29,6 +30,8 @@ type WorkflowState = {
       description: string
     }>
     retrievedAugmentationContent?: string
+    ragComponents?: ComponentDoc[] // RAG检索到的组件
+    ragConfidence?: number // RAG检索置信度
   }
   generatedCode: string
 }
@@ -60,6 +63,8 @@ export type DesignProcessingWorkflowContext = {
         description: string
       }>
       retrievedAugmentationContent?: string
+      ragComponents?: ComponentDoc[] // RAG检索到的组件
+      ragConfidence?: number // RAG检索置信度
     }
   }
 }
@@ -81,6 +86,8 @@ export type GenerateProcessingWorkflowContext = {
         description: string
       }>
       retrievedAugmentationContent?: string
+      ragComponents?: ComponentDoc[] // RAG检索到的组件
+      ragConfidence?: number // RAG检索置信度
     }
     generatedCode: string
   }

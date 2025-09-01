@@ -8,7 +8,21 @@
       "Bash(npx tsx:*)",
       "Bash(pnpm link:*)",
       "Bash(pnpm install:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Read(/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components/**)",
+      "Read(/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components/components/**)",
+      "Read(/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components/components/button/**)",
+      "Read(/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components/components/button/**)",
+      "Bash(grep:*)",
+      "Read(/tmp/**)",
+      "Read(/tmp/**)",
+      "Bash(python3:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Read(/Users/zhangyanhua/Desktop/AI/docs/private-bizcomponent-website/packages/@private-basic-components/**)",
+      "Bash(chmod:*)",
+      "Bash(/tmp/sync-private-components.sh:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

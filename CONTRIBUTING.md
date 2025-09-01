@@ -32,8 +32,6 @@ Based on the issue description, claim issues you're interested in and start codi
 
 ### 2. Fork the Repository
 
-Visit the [Compoder GitHub repository](https://github.com/IamLiuLv/compoder), click the "Fork" button in the top right corner to create your own copy of the repository.
-
 ### 3. Clone the Repository
 
 ```bash
@@ -151,8 +149,6 @@ When you're ready:
    - PR title should concisely describe the changes
    - PR description should include detailed change information, related issue links, etc.
 
-After your PR is merged, you'll be honored in the project's [contributors list](https://github.com/IamLiuLv/compoder/graphs/contributors).
-
 ## Code Generation Commands
 
 Compoder provides various code generation commands to quickly create different components and services:
@@ -180,8 +176,4 @@ Enter these commands in the Cursor chat agent along with your context and requir
 
 If you encounter issues:
 
-- Join the [GitHub Discussions](https://github.com/IamLiuLv/compoder/discussions) community
-- Ask questions in [GitHub Issues](https://github.com/IamLiuLv/compoder/issues)
 - Join the WeChat community: Scan the QR code below, add as WeChat friend with the note "Compoder" to be added to the Compoder community where you can learn and exchange ideas with like-minded developers.
-
-<img src="./assets/wechat.png" alt="compoder" width="100px">
